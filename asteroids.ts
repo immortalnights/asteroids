@@ -27,6 +27,19 @@ const wrap = function(value: number, min: number, max: number): number {
   return value
 }
 
+const between = (min: number, max: number): number => {
+  return Math.floor(floatBetween(min, max))
+}
+
+const floatBetween = (min: number, max: number): number => {
+  return (Math.random() * max) + min
+}
+
+const pick = (choices: Array<any>): any => {
+  const index = between(0, choices.length)
+  return choices[index]
+}
+
 class Vector2D
 {
   x: number
@@ -86,9 +99,57 @@ class Vector2D
   }
 }
 
+class StarBackground
+{
+  scene: Scene
+  stars: Array<any>
+
+  constructor(scene: Scene)
+  {
+    this.scene = scene
+    this.stars = []
+    for (let index = 0; index < 300; index++)
+    {
+      const size = between(1, 2)
+      const alpha = floatBetween(0.1, 1)
+      const x = between(0, scene.width)
+      const y = between(0, scene.height)
+      const color = pick([ '255, 255, 255', '128, 0, 128', '34, 34, 153' ])
+      // const color = pick([ 0xffffff, 0x800080, 0x222299 ])
+
+      this.stars.push({
+        x,
+        y,
+        size,
+        color,
+        alpha
+      })
+    }
+  }
+
+  update(delta: number): void
+  {
+    // TODO change the starts a little
+  }
+
+  render(): void
+  {
+    const context = this.scene.context as CanvasRenderingContext2D
+
+    context.save()
+
+    this.stars.forEach(star => {
+      context.fillStyle = `rgba(${star.color}, ${star.alpha})`
+      context.fillRect(star.x, star.y, star.size, star.size)
+    })
+
+    context.restore()
+  }
+}
+
 class Ship
 {
-  game: Asteroids
+  scene: Scene
   position: Vector2D
   velocity: Vector2D
   /** Angle in degrees */
@@ -96,9 +157,9 @@ class Ship
   _speed: number
   size: number
 
-  constructor(game: Asteroids, x: number, y: number, size: number)
+  constructor(scene: Scene, x: number, y: number, size: number)
   {
-    this.game = game
+    this.scene = scene
     this.position = new Vector2D(x, y)
     this.velocity = new Vector2D(0, 0)
     this.size = size
@@ -114,8 +175,6 @@ class Ship
   set speed(speed: number)
   {
     this._speed = clamp(speed, 0, 1000)
-
-    this.velocity.setToPolar(this.radians, this.speed)
   }
 
   get angle(): number
@@ -133,13 +192,19 @@ class Ship
     return this.angle * Math.PI / 180
   }
 
+  setVelocity(speed: number)
+  {
+    this.speed = speed
+    this.velocity.setToPolar(this.radians, this.speed)
+  }
+
   update(delta: number): void
   {
     const movement: Vector2D = this.velocity.clone().multiply(delta, delta)
     this.position.add(movement)
 
-    this.position.x = wrap(this.position.x, -(this.size * 2), this.game.canvas.width + (this.size * 2))
-    this.position.y = wrap(this.position.y, -(this.size * 2), this.game.canvas.height + (this.size * 2))
+    this.position.x = wrap(this.position.x, -(this.size * 2), this.scene.canvas.width + (this.size * 2))
+    this.position.y = wrap(this.position.y, -(this.size * 2), this.scene.canvas.height + (this.size * 2))
   }
 
   render(context: CanvasRenderingContext2D): void
@@ -166,32 +231,51 @@ class Ship
   }
 }
 
-export default class Asteroids
+class Scene
 {
   canvas: HTMLCanvasElement
   context: CanvasRenderingContext2D | null
+  gameObjects: Array<any>
   animationFrameId: number
-
-  ship: Ship
   lastFrameTime: number
 
   constructor(canvas: HTMLCanvasElement)
   {
     this.canvas = canvas
     this.context = canvas.getContext('2d')
+    this.gameObjects = []
     this.animationFrameId = 0
-    this.ship = new Ship(this, 100, 100, 10)
     this.lastFrameTime = 0
+  }
+
+  get width(): number
+  {
+    return this.canvas.width
+  }
+
+  get height(): number
+  {
+    return this.canvas.height
+  }
+
+  add(obj: object): void
+  {
+    this.gameObjects.push(obj)
   }
 
   play(): void
   {
-    this.animationFrameId = window.requestAnimationFrame(this.render.bind(this))
+    this.frame()
   }
 
   stop(): void
   {
     window.cancelAnimationFrame(this.animationFrameId)
+  }
+
+  frame(): void
+  {
+    this.animationFrameId = window.requestAnimationFrame(this.render.bind(this))
   }
 
   render(time: number): void
@@ -200,13 +284,67 @@ export default class Asteroids
     context.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
     const delta = time - this.lastFrameTime
-    this.ship.update(delta / 1000)
-    this.ship.render(context)
     this.lastFrameTime = time
 
-    this.play()
+    this.gameObjects.forEach(item => {
+      item.update(delta / 1000)
+      item.render(this.context)
+    })
+
+    this.frame()
+  }
+}
+
+class Rocks
+{
+
+}
+
+class Bullet
+{
+
+}
+
+class Partical
+{
+
+}
+
+export default class Asteroids
+{
+  scene: Scene
+  ship: Ship | undefined
+  background: StarBackground | undefined
+  rocks: Array<Rocks>
+  bullets: Array<Bullet>
+  particals: Array<Partical>
+
+  constructor(canvas: HTMLCanvasElement)
+  {
+    this.scene = new Scene(canvas)
+    this.ship = undefined
+    this.background = undefined
+    this.rocks = []
+    this.bullets = []
+    this.particals = []
+  }
+
+  play()
+  {
+    this.ship = new Ship(this.scene, 100, 100, 10)
+    this.background = new StarBackground(this.scene)
+
+    this.scene.add(this.ship)
+    this.scene.add(this.background)
 
     this.ship.angle = 40
-    this.ship.speed = 500
+    this.ship.setVelocity(500)
+
+    this.scene.play()
+  }
+
+  stop()
+  {
+    this.scene.stop()
   }
 }
