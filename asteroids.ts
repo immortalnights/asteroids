@@ -1,4 +1,6 @@
 
+const MAX_ROCK_COUNT: number = 0
+
 const clamp = function(value: number, min: number, max: number): number {
   if (value < min)
   {
@@ -16,12 +18,12 @@ const clamp = function(value: number, min: number, max: number): number {
 const wrap = function(value: number, min: number, max: number): number {
   if (value < min)
   {
-    value = max
+    value = max + (value % max)
   }
 
   if (value > max)
   {
-    value = min
+    value = min + (value % max)
   }
 
   return value
@@ -436,7 +438,7 @@ export default class Asteroids
     this.scene.add(this.background)
 
     // Create rocks
-    for (let count: number = 0; count < 100; count++)
+    for (let count: number = 0; count < MAX_ROCK_COUNT; count++)
     {
       const rock: Rock = new Rock(this.scene, between(0, this.scene.width), between(0, this.scene.height))
       this.scene.add(rock)
@@ -444,7 +446,7 @@ export default class Asteroids
 
     this.scene.add(this.ship)
 
-    this.ship.angle = 40
+    this.ship.angle = -150
     this.ship.setVelocity(500)
 
     this.scene.play()
