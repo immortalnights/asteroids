@@ -1,6 +1,19 @@
 
 const MAX_ROCK_COUNT: number = 0
 
+const Angle = {
+  /**
+   * 
+   * @param a 
+   * @param b 
+   * @returns angle in degrees
+   */
+  between(a: VectorLike, b: VectorLike): number
+  {
+    return Math.atan2(b.y - a.y, b.x - a.x) * (180 / Math.PI)
+  }
+}
+
 const clamp = function(value: number, min: number, max: number): number {
   if (value < min)
   {
@@ -47,7 +60,7 @@ class Vector2D
   x: number
   y: number
 
-  constructor(x: number, y: number)
+  constructor(x: number = 0, y: number = 0)
   {
     this.x = x
     this.y = y
@@ -186,7 +199,10 @@ class Ship
 
   set angle(angle: number)
   {
-    this._angle = wrap(angle, 0, 360)
+    this._angle = angle // wrap(angle, 0, 360)
+
+    // fix me
+    this.velocity.setToPolar(this.radians, this.speed)
   }
 
   get radians(): number
@@ -337,10 +353,22 @@ class Rock
   }
 }
 
+interface VectorLike {
+  x: number
+  y: number
+}
+
+interface Pointer {
+  x: number,
+  y: number,
+  in: boolean
+}
+
 class Scene
 {
   canvas: HTMLCanvasElement
   context: CanvasRenderingContext2D | null
+  pointer: Pointer
   gameObjects: Array<any>
   animationFrameId: number
   lastFrameTime: number
@@ -349,6 +377,7 @@ class Scene
   {
     this.canvas = canvas
     this.context = canvas.getContext('2d')
+    this.pointer = { x: 0, y: 0, in: false }
     this.gameObjects = []
     this.animationFrameId = 0
     this.lastFrameTime = 0
@@ -371,6 +400,21 @@ class Scene
 
   play(): void
   {
+    this.canvas.addEventListener('mouseenter', event => {
+      this.pointer.in = true
+    })
+    this.canvas.addEventListener('mouseleave', event => {
+      this.pointer.in = false
+    })
+    this.canvas.addEventListener('mousemove', event => {
+      const rect = this.canvas.getBoundingClientRect()
+      const scaleX = this.canvas.width / rect.width
+      const scaleY = this.canvas.height / rect.height
+
+      this.pointer.x = (event.clientX - rect.left) * scaleX
+      this.pointer.y = (event.clientY - rect.top) * scaleY
+    })
+
     this.frame()
   }
 
@@ -381,7 +425,34 @@ class Scene
 
   frame(): void
   {
-    this.animationFrameId = window.requestAnimationFrame(this.render.bind(this))
+    this.animationFrameId = window.requestAnimationFrame((time: number) => {
+      this.update(time)
+      this.render(time)
+    })
+  }
+
+  update(time: number)
+  {
+    // Turn ship towards the pointer location
+    const ship = this.gameObjects.find(obj => obj instanceof Ship)
+
+    if (this.pointer.in)
+    {
+      const TURN_SPEED: number = 1
+      let angle = Angle.between(ship.position, this.pointer)
+      // console.log(ship.angle, angle)
+
+      // angle = (angle, 0, 360)
+
+      if (ship.angle > angle)
+      {
+        ship.angle -= TURN_SPEED
+      }
+      else if (ship.angle < angle)
+      {
+        ship.angle += TURN_SPEED
+      }
+    }
   }
 
   render(time: number): void
@@ -396,6 +467,9 @@ class Scene
       item.update(delta / 1000)
       item.render(this.context)
     })
+
+    context.fillStyle = '#ffffff'
+    context.fillText(`${this.pointer.x}, ${this.pointer.y}`, 10, 10)
 
     this.frame()
   }
