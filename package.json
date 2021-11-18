@@ -5,8 +5,10 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build": "webpack --config webpack/prod.js ",
-    "start": "webpack serve --config webpack/base.js --open",
+    "build": "webpack --mode production",
+    "start": "webpack serve --progress --color --mode development --hot",
+    "buildx": "webpack --config webpack/prod.js ",
+    "startx": "webpack serve --config webpack/base.js --open",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
