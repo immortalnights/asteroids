@@ -482,7 +482,6 @@ class Bullet
 
 class Partical
 {
-
 }
 
 export default class Asteroids

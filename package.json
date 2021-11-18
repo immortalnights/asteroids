@@ -1,0 +1,35 @@
+{
+  "name": "asteroids",
+  "version": "0.1.0",
+  "description": "Asteroids clone",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack --config webpack/prod.js ",
+    "start": "webpack serve --config webpack/base.js --open",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/immortalnights/asteroids.git"
+  },
+  "author": "Andrew Cockayne",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/immortalnights/asteroids/issues"
+  },
+  "homepage": "https://github.com/immortalnights/asteroids#readme",
+  "devDependencies": {
+    "@babel/core": "^7.16.0",
+    "@babel/preset-env": "^7.16.4",
+    "@babel/preset-typescript": "^7.16.0",
+    "babel-loader": "^8.2.3",
+    "clean-webpack-plugin": "^4.0.0",
+    "html-webpack-plugin": "^5.5.0",
+    "ts-loader": "^9.2.6",
+    "typescript": "^4.5.2",
+    "webpack": "^5.64.1",
+    "webpack-cli": "^4.9.1",
+    "webpack-dev-server": "^4.5.0"
+  }
+}
