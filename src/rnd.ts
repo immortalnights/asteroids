@@ -3,7 +3,7 @@ export const between = (min: number, max: number): number => {
 }
 
 export const floatBetween = (min: number, max: number): number => {
-  return (Math.random() * max) + min
+  return (Math.random() * (min - max)) + max
 }
 
 export const pick = (choices: Array<any>): any => {

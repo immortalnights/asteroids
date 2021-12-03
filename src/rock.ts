@@ -41,8 +41,8 @@ export default class Rock
       const points: Array<Vector2D> = pointsOnCircle(totalPoints, x, y, r)
 
       points.forEach(point => {
-          point.x += RND.between(-(r * 0.25), r * 0.25) + r
-          point.y += RND.between(-(r * 0.25), r * 0.25) + r
+          point.x += RND.between(-(r * 0.25), r * 0.25)
+          point.y += RND.between(-(r * 0.25), r * 0.25)
       })
 
       return points
@@ -55,7 +55,7 @@ export default class Rock
     this.rotationSpeed = RND.floatBetween(0.1, 2)
     this.velocity = new Vector2D(RND.between(-200, 200), RND.between(-200, 200))
     this.points = createPolygonPoints(0, 0, this.size, 8)
-    // console.log(this.points)
+    // console.log(this.position, this.velocity)
   }
 
   get radians(): number
@@ -82,7 +82,7 @@ export default class Rock
     context.strokeStyle = '#aaaaaa'
     context.fillStyle = '#333333'
 
-    context.translate(this.position.x - this.size / 2, this.position.y - this.size / 2)
+    context.translate(this.position.x + this.size / 2, this.position.y + this.size / 2)
     context.rotate(this.radians)
 
     context.beginPath()

@@ -1,6 +1,6 @@
 
 
-const MAX_ROCK_COUNT: number = 0
+const MAX_ROCK_COUNT: number = 10
 
 import Bullet from './bullet'
 import Particle from './particle'
