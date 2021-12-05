@@ -2,6 +2,8 @@ import Scene from './scene'
 import Vector2D from './vector2d'
 import M from './math'
 
+const SHIP_MAXIMUM_SPEED = 500
+
 export default class Ship
 {
   scene: Scene
@@ -12,7 +14,10 @@ export default class Ship
   _speed: number
   size: number
 
-  constructor(scene: Scene, x: number, y: number, size: number)
+  rotateTo: number | null
+  rotationSpeed: number
+
+  constructor(scene: Scene, x: number, y: number, size: number = 20)
   {
     this.scene = scene
     this.position = new Vector2D(x, y)
@@ -20,6 +25,58 @@ export default class Ship
     this.size = size
     this._angle = 0
     this._speed = 0
+
+    this.rotateTo = null
+    this.rotationSpeed = 0
+  }
+
+  // control interface
+  /**
+   *
+   * @param direction positive right, negative left
+   */
+  turn(direction: number)
+  {
+    switch (direction)
+    {
+      case -1:
+      {
+        this.rotationSpeed = -1
+        break
+      }
+      case 0:
+      {
+        this.rotationSpeed = 0
+        break
+      }
+      case 1:
+      {
+        this.rotationSpeed = 1
+        break
+      }
+    }
+  }
+
+  /**
+   *
+   * @param angle target angle in degrees
+   */
+  turnTo(angle: number | null)
+  {
+    this.rotateTo = angle
+  }
+
+  accelerate()
+  {
+    this.speed += 5
+
+    this.velocity.add(this.speed, this.speed)
+    this.velocity.setToPolar(this.radians, this.speed)
+  }
+
+  brake()
+  {
+    this.speed -= 5
   }
 
   get speed(): number
@@ -27,39 +84,41 @@ export default class Ship
     return this._speed
   }
 
-  set speed(speed: number)
-  {
-    this._speed = M.clamp(speed, 0, 1000)
-  }
-
   get angle(): number
   {
     return this._angle
   }
 
-  set angle(angle: number)
-  {
-    this._angle = angle // wrap(angle, 0, 360)
-
-    // fix me
-    this.velocity.setToPolar(this.radians, this.speed)
-  }
-
   get radians(): number
   {
-    return this.angle * Math.PI / 180
+    return M.Angle.toRadians(this.angle)
   }
 
-  setVelocity(speed: number)
+  set speed(speed: number)
   {
-    this.speed = speed
-    this.velocity.setToPolar(this.radians, this.speed)
+    this._speed = M.clamp(speed, 0, SHIP_MAXIMUM_SPEED)
+  }
+
+  set angle(angle: number)
+  {
+    this._angle = angle // M.wrap(angle, 0, 360)
   }
 
   update(delta: number): void
   {
-    const movement: Vector2D = this.velocity.clone().multiply(delta, delta)
-    this.position.add(movement)
+    // update angle by turn speed
+    if (this.rotationSpeed != 0)
+    {
+      this.angle += this.rotationSpeed
+    }
+    else if (this.rotateTo != null)
+    {
+      this.angle = M.Angle.toDegrees(M.Angle.rotateTo(this.radians, M.Angle.toRadians(this.rotateTo)))
+    }
+
+    // update velocity by speed
+    const velocity = this.velocity.clone().multiply(delta, delta)
+    this.position.add(velocity)
 
     this.position.x = M.wrap(this.position.x, -(this.size * 2), this.scene.canvas.width + (this.size * 2))
     this.position.y = M.wrap(this.position.y, -(this.size * 2), this.scene.canvas.height + (this.size * 2))
@@ -77,7 +136,7 @@ export default class Ship
     context.strokeStyle = '#aaaaaa'
     context.fillStyle = '#999999'
 
-    context.translate(this.position.x - this.size / 2, this.position.y - this.size / 2)
+    context.translate(this.position.x + (this.size / 2), this.position.y + (this.size / 2))
     context.rotate(this.radians)
 
     context.beginPath()
@@ -87,6 +146,10 @@ export default class Ship
     context.closePath()
     context.stroke()
     context.fill()
+
+    // center point
+    // context.fillStyle = '#ffffff'
+    // context.fillRect(-1, -1, 2, 2)
 
     context.setTransform(1, 0, 0, 1, 0, 0)
     context.restore()

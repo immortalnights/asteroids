@@ -1,33 +1,17 @@
-
-
-const MAX_ROCK_COUNT: number = 10
-
-import Bullet from './bullet'
-import Particle from './particle'
-import Rock from './rock'
 import Scene from './scene'
-import Ship from './ship'
-import StarBackground from './starbackground'
-import RND from './rnd'
-
 
 export default class Asteroids
 {
   scene: Scene
-  ship: Ship | undefined
-  background: StarBackground | undefined
-  rocks: Array<Rock>
-  bullets: Array<Bullet>
-  particals: Array<Particle>
+  animationFrameId: number
+  lastFrameTime: number
 
   constructor(canvas: HTMLCanvasElement)
   {
     this.scene = new Scene(canvas)
-    this.ship = undefined
-    this.background = undefined
-    this.rocks = []
-    this.bullets = []
-    this.particals = []
+    this.animationFrameId = 0
+    this.lastFrameTime = 0
+    this.onFrame = this.onFrame.bind(this)
   }
 
   resize()
@@ -44,28 +28,24 @@ export default class Asteroids
 
   play()
   {
-    this.ship = new Ship(this.scene, this.scene.width / 2, this.scene.height / 2, 10)
-    this.background = new StarBackground(this.scene)
+    // this.active = true
+    this.scene.create()
+    this.onFrame(0)
+  }
 
-    this.scene.add(this.background)
+  onFrame(time: number)
+  {
+    const delta = (time - this.lastFrameTime) / 1000
+    this.lastFrameTime = time
 
-    // Create rocks
-    for (let count: number = 0; count < MAX_ROCK_COUNT; count++)
-    {
-      const rock: Rock = new Rock(this.scene, RND.between(0, this.scene.width), RND.between(0, this.scene.height))
-      this.scene.add(rock)
-    }
+    this.scene.update(delta)
+    this.scene.render(delta)
 
-    this.scene.add(this.ship)
-
-    this.ship.angle = -150
-    this.ship.setVelocity(500)
-
-    this.scene.play()
+    this.animationFrameId = window.requestAnimationFrame(this.onFrame)
   }
 
   stop()
   {
-    this.scene.stop()
+    window.cancelAnimationFrame(this.animationFrameId)
   }
 }

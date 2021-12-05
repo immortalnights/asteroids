@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', function() {
   asteroids.play()
 
   window.addEventListener('resize', () => {
-    console.log("resize")
     asteroids.resize()
   })
 })

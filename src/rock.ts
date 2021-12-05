@@ -33,7 +33,7 @@ export default class Rock
         points.push(point)
         angle += angleStep;
       }
-  
+
       return points;
     };
 
@@ -54,7 +54,7 @@ export default class Rock
     this.angle = 0
     this.rotationSpeed = RND.floatBetween(0.1, 2)
     this.velocity = new Vector2D(RND.between(-200, 200), RND.between(-200, 200))
-    this.points = createPolygonPoints(0, 0, this.size, 8)
+    this.points = createPolygonPoints(0, 0, this.size, 12)
     // console.log(this.position, this.velocity)
   }
 
@@ -96,6 +96,10 @@ export default class Rock
     context.closePath()
     context.stroke()
     context.fill()
+
+    // center point
+    // context.fillStyle = '#ffffff'
+    // context.fillRect(-1, -1, 2, 2)
 
     context.setTransform(1, 0, 0, 1, 0, 0)
 
