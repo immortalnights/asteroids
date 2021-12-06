@@ -12,7 +12,7 @@ export default class Input
   turnToMouse: boolean
   turn: number
   accelerate: number
-  shoot: number
+  shoot: boolean
   changed: boolean
 
   constructor(canvas: HTMLCanvasElement)
@@ -22,7 +22,7 @@ export default class Input
     this.turnToMouse = false
     this.turn = 0
     this.accelerate = 0
-    this.shoot = 0
+    this.shoot = false
     this.changed = false
 
     // canvas must have a tab index to have keyboard events
@@ -76,7 +76,7 @@ export default class Input
   onKeyDown(event: KeyboardEvent): void
   {
     event.preventDefault()
-    if (event.key === 'a' || event.key === 'ArrowUp')
+    if (event.key === 'w' || event.key === 'ArrowUp')
     {
       this.accelerate = 1
     }
@@ -84,19 +84,19 @@ export default class Input
     {
       this.accelerate = -1
     }
-    else if (event.key === 'd' || event.key === 'ArrowLeft')
+    else if (event.key === 'a' || event.key === 'ArrowLeft')
     {
       this.turn = -1
       this.turnToMouse = false
     }
-    else if (event.key === 'a' || event.key === 'ArrowRight')
+    else if (event.key === 'd' || event.key === 'ArrowRight')
     {
       this.turn = 1
       this.turnToMouse = false
     }
     else if (event.key === ' ')
     {
-      this.shoot = 1
+      this.shoot = true
     }
 
     this.changed = true
@@ -104,7 +104,7 @@ export default class Input
 
   onKeyUp(event: KeyboardEvent)
   {
-    if (event.key === 'a' || event.key === 'ArrowUp')
+    if (event.key === 'w' || event.key === 'ArrowUp')
     {
       this.accelerate = 0
     }
@@ -112,17 +112,17 @@ export default class Input
     {
       this.accelerate = 0
     }
-    else if (event.key === 'd' || event.key === 'ArrowLeft')
+    else if (event.key === 'a' || event.key === 'ArrowLeft')
     {
       this.turn = 0
     }
-    else if (event.key === 'a' || event.key === 'ArrowRight')
+    else if (event.key === 'd' || event.key === 'ArrowRight')
     {
       this.turn = 0
     }
     else if (event.key === ' ')
     {
-      this.shoot = 0
+      this.shoot = false
     }
 
     this.changed = true
