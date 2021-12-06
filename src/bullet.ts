@@ -31,7 +31,8 @@ export default class Bullet
       // TODO destroy if offscreen
       // this.position.x = M.wrap(this.position.x, -(this.size * 2), this.scene.canvas.width + (this.size * 2))
       // this.position.y = M.wrap(this.position.y, -(this.size * 2), this.scene.canvas.height + (this.size * 2))
-      const offscreen = false
+      const size2 = this.size * 2
+      const offscreen = this.position.x < -size2 || this.position.x > this.scene.width + size2 || this.position.y < -size2 || this.position.y > this.scene.height + size2
       if (offscreen)
       {
         this.scene.destroyGameObject(this)
@@ -47,8 +48,10 @@ export default class Bullet
 
       context.fillStyle = '#ffffff'
 
+      context.beginPath()
       context.arc(this.position.x, this.position.y, this.size, 0, 360, false)
       context.fill()
+      context.closePath()
       context.restore()
     }
   }
