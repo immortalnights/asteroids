@@ -2,6 +2,18 @@ import { VectorLike } from './types'
 
 const PI2 = Math.PI * 2
 
+export const inc: Function = (value: number, amount: number, max: number): number => {
+  value += amount
+  value = Math.min(value, max)
+  return value
+}
+
+export const dec: Function = (value: number, amount: number, min: number): number => {
+  value -= amount
+  value = Math.max(value, min)
+  return value
+}
+
 export const clamp: Function = (value: number, min: number, max: number): number => {
   if (value < min)
   {
@@ -91,6 +103,8 @@ export const Angle = {
 }
 
 export default {
+  inc,
+  dec,
   clamp,
   wrap,
   Angle

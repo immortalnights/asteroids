@@ -49,6 +49,14 @@ export default class Vector2D
     return this
   }
 
+  rotate(radians: number)
+  {
+    const cos = Math.cos(radians);
+    const sin = Math.sin(radians);
+
+    return this.set(cos * this.x - sin * this.y, sin * this.x + cos * this.y);
+  }
+
   setToPolar(azimuth: number, radius: number = 1): this
   {
     this.x = Math.cos(azimuth) * radius

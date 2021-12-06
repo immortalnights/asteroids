@@ -6,8 +6,19 @@ import Particle from './particle'
 import Rock from './rock'
 import StarBackground from './starbackground'
 import RND from './rnd'
+import Vector2D from './vector2d'
 
 const MAX_ROCK_COUNT: number = 10
+
+class ObjectPool<T>
+{
+  items: Array<T>
+
+  constructor()
+  {
+    this.items = []
+  }
+}
 
 
 export default class Scene
@@ -45,9 +56,22 @@ export default class Scene
     return this.canvas.height
   }
 
-  addGameObject(obj: object): void
+  addGameObject(obj: object, before: object | undefined = undefined, after: object | undefined = undefined): void
   {
-    this.displayList.push(obj)
+    if (before)
+    {
+      const index = this.displayList.indexOf(before)
+      this.displayList.splice(index - 1, 0, obj)
+    }
+    else if (after)
+    {
+      const index = this.displayList.indexOf(after)
+      this.displayList.splice(index, 0, obj)
+    }
+    else
+    {
+      this.displayList.push(obj)
+    }
   }
 
   destroyGameObject(obj: any): void
@@ -101,7 +125,18 @@ export default class Scene
       {
         ship.brake()
       }
-      // shoot
+      else if (true === this.input.shoot)
+      {
+        if (ship.fire())
+        {
+          const velocity = new Vector2D(600, 0)
+          // velocity.setToPolar(800, ship.radians)
+          velocity.rotate(ship.radians)
+          const bullet = new Bullet(this, ship.position.x, ship.position.y, velocity)
+          this.bullets.push(bullet)
+          this.addGameObject(bullet, ship)
+        }
+      }
       this.input.changed = false
     }
 
@@ -125,7 +160,8 @@ export default class Scene
     const ship = this.ship as Ship
 
     context.fillStyle = '#ffffff'
-    context.fillText(`${this.input.pointer.x.toFixed(2)}, ${this.input.pointer.y.toFixed(2)}; ${ship.radians.toFixed(2)}, ${M.Angle.toRadians(ship.rotateTo || 0).toFixed(2)} ${ship.rotationSpeed.toFixed(2)}; ${ship.speed.toFixed(2)} ${ship.velocity.x.toFixed(2)}, ${ship.velocity.y.toFixed(2)}`, 10, 10)
+    context.fillText(`${this.input.pointer.x.toFixed(2)}, ${this.input.pointer.y.toFixed(2)}; ${ship.radians.toFixed(2)}, ${M.Angle.toRadians(ship.rotateTo || 0).toFixed(2)} ${ship.rotationSpeed.toFixed(2)}; ${ship.speed.toFixed(2)} ${ship.velocity.x.toFixed(2)}, ${ship.velocity.y.toFixed(2)}; ${ship.weaponCooldown.toFixed(2)}`, 10, 10)
     context.fillText(`Controls ${this.input.accelerate}, ${this.input.turn}, ${this.input.shoot}`, 10, 20)
+    context.fillText(`Renderer ${this.displayList.length}`, 10, 30)
   }
 }

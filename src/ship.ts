@@ -17,6 +17,8 @@ export default class Ship
   rotateTo: number | null
   rotationSpeed: number
 
+  weaponCooldown: number
+
   constructor(scene: Scene, x: number, y: number, size: number = 20)
   {
     this.scene = scene
@@ -28,6 +30,8 @@ export default class Ship
 
     this.rotateTo = null
     this.rotationSpeed = 0
+
+    this.weaponCooldown = 0
   }
 
   // control interface
@@ -79,6 +83,16 @@ export default class Ship
     this.speed -= 5
   }
 
+  fire()
+  {
+    const ok = this.weaponCooldown === 0
+    if (ok)
+    {
+      this.weaponCooldown = .125
+    }
+    return ok
+  }
+
   get speed(): number
   {
     return this._speed
@@ -116,6 +130,8 @@ export default class Ship
       this.angle = M.Angle.toDegrees(M.Angle.rotateTo(this.radians, M.Angle.toRadians(this.rotateTo)))
     }
 
+    this.weaponCooldown = M.dec(this.weaponCooldown, delta, 0)
+
     // update velocity by speed
     const velocity = this.velocity.clone().multiply(delta, delta)
     this.position.add(velocity)
@@ -136,7 +152,8 @@ export default class Ship
     context.strokeStyle = '#aaaaaa'
     context.fillStyle = '#999999'
 
-    context.translate(this.position.x + (this.size / 2), this.position.y + (this.size / 2))
+    // context.translate(this.position.x + (this.size / 2), this.position.y + (this.size / 2))
+    context.translate(this.position.x, this.position.y)
     context.rotate(this.radians)
 
     context.beginPath()
