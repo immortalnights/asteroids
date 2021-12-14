@@ -1,8 +1,9 @@
 import Scene from "./scene"
+import { GameObject, Box } from "./gameobject"
 import Vector2D from "./vector2d"
 import M from './math'
 
-export default class Bullet
+export default class Bullet implements GameObject
 {
   scene: Scene
   active: boolean
@@ -19,6 +20,20 @@ export default class Bullet
     this.position = new Vector2D(x, y)
     this.size = size
     this.velocity = velocity
+  }
+
+  getBoundingBox(): Box
+  {
+    const x = this.position.x
+    const y = this.position.y
+    return {
+      x,
+      y,
+      top: y - this.size / 2,
+      right: x + this.size / 2,
+      bottom: y + this.size / 2,
+      left: x - this.size / 2,
+    }
   }
 
   update(delta: number): void

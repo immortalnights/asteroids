@@ -1,9 +1,10 @@
 import Scene from './scene'
+import { GameObject, Box } from './gameobject'
 import Vector2D from './vector2d'
 import M from './math'
 import RND from './rnd'
 
-export default class Rock
+export default class Rock implements GameObject
 {
   scene: Scene
   size: number
@@ -61,6 +62,20 @@ export default class Rock
   get radians(): number
   {
     return this.angle * Math.PI / 180
+  }
+
+  getBoundingBox(): Box
+  {
+    const x = this.position.x
+    const y = this.position.y
+    return {
+      x,
+      y,
+      top: y - this.size / 2,
+      right: x + this.size / 2,
+      bottom: y + this.size / 2,
+      left: x - this.size / 2,
+    }
   }
 
   update(delta: number)

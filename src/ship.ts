@@ -1,10 +1,11 @@
 import Scene from './scene'
+import { Box, GameObject } from './gameobject'
 import Vector2D from './vector2d'
 import M from './math'
 
 const SHIP_MAXIMUM_SPEED = 500
 
-export default class Ship
+export default class Ship implements GameObject
 {
   scene: Scene
   position: Vector2D
@@ -116,6 +117,20 @@ export default class Ship
   set angle(angle: number)
   {
     this._angle = angle // M.wrap(angle, 0, 360)
+  }
+
+  getBoundingBox(): Box
+  {
+    const x = this.position.x
+    const y = this.position.y
+    return {
+      x,
+      y,
+      top: y - this.size / 2,
+      right: x + this.size / 2,
+      bottom: y + this.size / 2,
+      left: x - this.size / 2,
+    }
   }
 
   update(delta: number): void

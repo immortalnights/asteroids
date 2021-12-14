@@ -7,6 +7,7 @@ import Rock from './rock'
 import StarBackground from './starbackground'
 import RND from './rnd'
 import Vector2D from './vector2d'
+import { GameObject, Box } from './gameobject'
 
 const MAX_ROCK_COUNT: number = 10
 
@@ -20,6 +21,55 @@ class ObjectPool<T>
   }
 }
 
+type CollisionCallbackFn = (a: GameObject, b: GameObject) => boolean
+
+
+class Collider
+{
+  readonly a: GameObject[]
+  readonly b: GameObject[]
+  readonly callback: CollisionCallbackFn
+
+  constructor(a: GameObject[], b: GameObject[], callback: CollisionCallbackFn)
+  {
+    this.a = a
+    this.b = b
+    this.callback = callback
+  }
+
+  check(): GameObject[]
+  {
+    const overlaps = (a: GameObject, b: GameObject) => {
+      let overlap: boolean = false
+
+      const aBox: Box  = a.getBoundingBox()
+      const bBox: Box = a.getBoundingBox()
+
+      // if (
+      //   aBox.top > bBox.top && aBox.top < bBox.bottom || aBox.bottom > bBox.top && aBox.bottom < bBox.bottom ||
+      //   aBox.right < bBox.right && aBox.right > bBox.left || aBox.right > bBox.left && aBox.right < bBox.right ||
+      //   aBox.left > bBox.left && aBox.left < bBox.right || aBox.right > bBox.left && aBox.right < bBox.right ||
+      //   aBox.left > bBox.left && aBox.left < bBox.right || aBox.right > bBox.left && aBox.right < bBox.right)
+      // {
+
+      // }
+
+
+      return overlap
+    }
+
+    this.a.forEach(a => {
+      this.b.forEach(b => {
+        if (overlaps(a, b))
+        {
+          this.callback(a, b)
+        }
+      })
+    })
+
+    return []
+  }
+}
 
 export default class Scene
 {
@@ -32,6 +82,7 @@ export default class Scene
   rocks: Array<Rock>
   bullets: Array<Bullet>
   particals: Array<Particle>
+  colliders: Collider[]
 
   constructor(canvas: HTMLCanvasElement)
   {
@@ -44,6 +95,7 @@ export default class Scene
     this.rocks = []
     this.bullets = []
     this.particals = []
+    this.colliders = []
   }
 
   get width(): number
@@ -74,6 +126,15 @@ export default class Scene
     }
   }
 
+  addCollider(a: GameObject | GameObject[], b: GameObject | GameObject[], callback: CollisionCallbackFn)
+  {
+    a = Array.isArray(a) ? a : [ a ]
+    b = Array.isArray(b) ? b : [ b ]
+    const collider = new Collider(a, b, callback)
+    this.colliders.push(collider)
+    return collider
+  }
+
   destroyGameObject(obj: any): void
   {
     const index = this.displayList.indexOf(obj)
@@ -97,9 +158,13 @@ export default class Scene
     {
       const rock: Rock = new Rock(this, RND.between(0, this.width), RND.between(0, this.height))
       this.addGameObject(rock)
+      this.rocks.push(rock)
     }
 
     this.addGameObject(this.ship)
+
+    this.addCollider(this.ship, this.rocks, this.onShipCrash)
+    this.addCollider(this.bullets, this.rocks, this.onBulletHitRock)
   }
 
   destroy()
@@ -145,6 +210,10 @@ export default class Scene
       const angle = M.Angle.between(ship.position, this.input.pointer)
       ship.turnTo(angle)
     }
+
+    this.colliders.forEach(collider => {
+      collider.check()
+    })
   }
 
   render(delta: number): void
@@ -163,5 +232,19 @@ export default class Scene
     context.fillText(`${this.input.pointer.x.toFixed(2)}, ${this.input.pointer.y.toFixed(2)}; ${ship.radians.toFixed(2)}, ${M.Angle.toRadians(ship.rotateTo || 0).toFixed(2)} ${ship.rotationSpeed.toFixed(2)}; ${ship.speed.toFixed(2)} ${ship.velocity.x.toFixed(2)}, ${ship.velocity.y.toFixed(2)}; ${ship.weaponCooldown.toFixed(2)}`, 10, 10)
     context.fillText(`Controls ${this.input.accelerate}, ${this.input.turn}, ${this.input.shoot}`, 10, 20)
     context.fillText(`Renderer ${this.displayList.length}`, 10, 30)
+  }
+
+  onShipCrash(ship: GameObject, rock: GameObject): boolean
+  {
+    ship = ship as Ship
+
+    console.log("Ship damaged!")
+
+    return true
+  }
+
+  onBulletHitRock(bullet: GameObject, rock: GameObject): boolean
+  {
+    return true
   }
 }
