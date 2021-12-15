@@ -13,6 +13,7 @@ export type Box = {
 export type GameObject = {
   readonly scene: Scene
   readonly position: Vector2D
+  active: boolean
 
   getBoundingBox(): Box
   update(delta: number): void

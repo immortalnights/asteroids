@@ -7,6 +7,7 @@ import RND from './rnd'
 export default class Rock implements GameObject
 {
   scene: Scene
+  active: boolean
   size: number
   position: Vector2D
   angle: number
@@ -14,7 +15,7 @@ export default class Rock implements GameObject
   velocity: Vector2D
   points: Array<Vector2D>
 
-  constructor(scene: Scene, x: number, y: number)
+  constructor(scene: Scene, x: number, y: number, size = 28)
   {
     const pointsOnCircle = (count: number, x: number, y: number, radius: number): Array<Vector2D> => {
       const startAngle: number = 0;
@@ -42,16 +43,17 @@ export default class Rock implements GameObject
       const points: Array<Vector2D> = pointsOnCircle(totalPoints, x, y, r)
 
       points.forEach(point => {
-          point.x += RND.between(-(r * 0.25), r * 0.25)
-          point.y += RND.between(-(r * 0.25), r * 0.25)
+        point.x += RND.between(-(r * 0.25), r * 0.25)
+        point.y += RND.between(-(r * 0.25), r * 0.25)
       })
 
       return points
     }
 
     this.scene = scene
+    this.active = true
     this.position = new Vector2D(x, y)
-    this.size = 28
+    this.size = size
     this.angle = 0
     this.rotationSpeed = RND.floatBetween(0.1, 2)
     this.velocity = new Vector2D(RND.between(-200, 200), RND.between(-200, 200))
@@ -66,15 +68,15 @@ export default class Rock implements GameObject
 
   getBoundingBox(): Box
   {
-    const x = this.position.x
-    const y = this.position.y
+    const x = this.position.x + this.size / 2
+    const y = this.position.y + this.size / 2
     return {
       x,
       y,
-      top: y - this.size / 2,
-      right: x + this.size / 2,
-      bottom: y + this.size / 2,
-      left: x - this.size / 2,
+      top: y - this.size,
+      right: x + this.size,
+      bottom: y + this.size,
+      left: x - this.size,
     }
   }
 

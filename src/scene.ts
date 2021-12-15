@@ -40,31 +40,32 @@ class Collider
   check(): GameObject[]
   {
     const overlaps = (a: GameObject, b: GameObject) => {
-      let overlap: boolean = false
-
       const aBox: Box  = a.getBoundingBox()
-      const bBox: Box = a.getBoundingBox()
+      const bBox: Box = b.getBoundingBox()
 
-      // if (
-      //   aBox.top > bBox.top && aBox.top < bBox.bottom || aBox.bottom > bBox.top && aBox.bottom < bBox.bottom ||
-      //   aBox.right < bBox.right && aBox.right > bBox.left || aBox.right > bBox.left && aBox.right < bBox.right ||
-      //   aBox.left > bBox.left && aBox.left < bBox.right || aBox.right > bBox.left && aBox.right < bBox.right ||
-      //   aBox.left > bBox.left && aBox.left < bBox.right || aBox.right > bBox.left && aBox.right < bBox.right)
-      // {
-
-      // }
-
+      const overlap = !(
+        aBox.right <= bBox.left ||
+        aBox.bottom <= bBox.top ||
+        aBox.x >= bBox.right ||
+        aBox.y >= bBox.bottom
+      )
 
       return overlap
     }
 
     this.a.forEach(a => {
-      this.b.forEach(b => {
-        if (overlaps(a, b))
-        {
-          this.callback(a, b)
-        }
-      })
+      if (a.active)
+      {
+        this.b.forEach(b => {
+          if (b.active)
+          {
+            if (overlaps(a, b))
+            {
+              this.callback(a, b)
+            }
+          }
+        })
+      }
     })
 
     return []
@@ -144,7 +145,10 @@ export default class Scene
       obj.active = false
     }
 
-    this.displayList.splice(index, 1)
+    if (index >= 0)
+    {
+      this.displayList.splice(index, 1)
+    }
   }
 
   create()
@@ -163,8 +167,8 @@ export default class Scene
 
     this.addGameObject(this.ship)
 
-    this.addCollider(this.ship, this.rocks, this.onShipCrash)
-    this.addCollider(this.bullets, this.rocks, this.onBulletHitRock)
+    this.addCollider(this.ship, this.rocks, this.onShipCrash.bind(this))
+    this.addCollider(this.bullets, this.rocks, this.onBulletHitRock.bind(this))
   }
 
   destroy()
@@ -232,19 +236,54 @@ export default class Scene
     context.fillText(`${this.input.pointer.x.toFixed(2)}, ${this.input.pointer.y.toFixed(2)}; ${ship.radians.toFixed(2)}, ${M.Angle.toRadians(ship.rotateTo || 0).toFixed(2)} ${ship.rotationSpeed.toFixed(2)}; ${ship.speed.toFixed(2)} ${ship.velocity.x.toFixed(2)}, ${ship.velocity.y.toFixed(2)}; ${ship.weaponCooldown.toFixed(2)}`, 10, 10)
     context.fillText(`Controls ${this.input.accelerate}, ${this.input.turn}, ${this.input.shoot}`, 10, 20)
     context.fillText(`Renderer ${this.displayList.length}`, 10, 30)
+
+
+    // debug
+    // this.displayList.forEach(item => {
+    //   if (item.getBoundingBox)
+    //   {
+    //     const box = item.getBoundingBox()
+    //     context.strokeStyle = 'purple'
+    //     context.strokeRect(box.left, box.top, box.right - box.left, box.bottom - box.top)
+    //   }
+    // })
   }
 
   onShipCrash(ship: GameObject, rock: GameObject): boolean
   {
     ship = ship as Ship
 
-    console.log("Ship damaged!")
+    // console.log("Ship damaged!")
 
     return true
   }
 
   onBulletHitRock(bullet: GameObject, rock: GameObject): boolean
   {
+    this.destroyGameObject(bullet)
+    const bulletIndex = this.bullets.indexOf(bullet as Bullet)
+    this.bullets.splice(bulletIndex, 1)
+
+    const aRock: Rock = rock as Rock
+    this.destroyGameObject(rock)
+    const rockIndex = this.rocks.indexOf(aRock)
+    this.rocks.splice(rockIndex, 1)
+
+    if (aRock.size > 8)
+    {
+      // spawn two rocks, half the size
+      const size = Math.max(aRock.size / 2, 8)
+      const rocks: Rock[] = [
+        new Rock(this, rock.position.x, rock.position.y, size),
+        new Rock(this, rock.position.x, rock.position.y, size)
+      ]
+
+      rocks.forEach(rock => {
+        this.addGameObject(rock)
+        this.rocks.push(rock)
+      });
+    }
+
     return true
   }
 }

@@ -8,6 +8,7 @@ const SHIP_MAXIMUM_SPEED = 500
 export default class Ship implements GameObject
 {
   scene: Scene
+  active: boolean
   position: Vector2D
   velocity: Vector2D
   /** Angle in degrees */
@@ -23,6 +24,7 @@ export default class Ship implements GameObject
   constructor(scene: Scene, x: number, y: number, size: number = 20)
   {
     this.scene = scene
+    this.active = true
     this.position = new Vector2D(x, y)
     this.velocity = new Vector2D(0, 0)
     this.size = size
@@ -127,7 +129,7 @@ export default class Ship implements GameObject
       x,
       y,
       top: y - this.size / 2,
-      right: x + this.size / 2,
+      right: x + this.size,
       bottom: y + this.size / 2,
       left: x - this.size / 2,
     }
