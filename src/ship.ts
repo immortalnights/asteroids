@@ -2,6 +2,7 @@ import Scene from './scene'
 import { Box, GameObject } from './gameobject'
 import Vector2D from './vector2d'
 import M from './math'
+import { Thruster } from './particleemitter'
 
 const SHIP_MAXIMUM_SPEED = 500
 
@@ -15,6 +16,7 @@ export default class Ship implements GameObject
   _angle: number
   _speed: number
   size: number
+  thruster: Thruster
 
   rotateTo: number | null
   rotationSpeed: number
@@ -30,6 +32,8 @@ export default class Ship implements GameObject
     this.size = size
     this._angle = 0
     this._speed = 0
+    this.thruster = new Thruster(this.position.x, this.position.y, 3, 180, 0.05, [200, 200, 200, 1])
+    this.thruster.burn = false
 
     this.rotateTo = null
     this.rotationSpeed = 0
@@ -155,6 +159,12 @@ export default class Ship implements GameObject
 
     this.position.x = M.wrap(this.position.x, -(this.size * 2), this.scene.canvas.width + (this.size * 2))
     this.position.y = M.wrap(this.position.y, -(this.size * 2), this.scene.canvas.height + (this.size * 2))
+
+    this.thruster.burn = (velocity.x > 0 || velocity.y > 0)
+    this.thruster.angle = 180 + this.angle
+    this.thruster.position.x = this.position.x
+    this.thruster.position.y = this.position.y
+    this.thruster.update(delta, this.scene.canvas)
   }
 
   render(context: CanvasRenderingContext2D): void
@@ -164,6 +174,8 @@ export default class Ship implements GameObject
       new Vector2D(-(this.size / 2), this.size / 2),
       new Vector2D(-(this.size / 2), -(this.size / 2)),
     ]
+
+    this.thruster.render(context)
 
     context.save()
     context.strokeStyle = '#aaaaaa'

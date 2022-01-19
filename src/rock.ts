@@ -2,7 +2,7 @@ import Scene from './scene'
 import { GameObject, Box } from './gameobject'
 import Vector2D from './vector2d'
 import M from './math'
-import RND from './rnd'
+import rnd from './rnd'
 
 export default class Rock implements GameObject
 {
@@ -43,8 +43,8 @@ export default class Rock implements GameObject
       const points: Array<Vector2D> = pointsOnCircle(totalPoints, x, y, r)
 
       points.forEach(point => {
-        point.x += RND.between(-(r * 0.25), r * 0.25)
-        point.y += RND.between(-(r * 0.25), r * 0.25)
+        point.x += rnd.between(-(r * 0.25), r * 0.25)
+        point.y += rnd.between(-(r * 0.25), r * 0.25)
       })
 
       return points
@@ -55,8 +55,8 @@ export default class Rock implements GameObject
     this.position = new Vector2D(x, y)
     this.size = size
     this.angle = 0
-    this.rotationSpeed = RND.floatBetween(0.1, 2)
-    this.velocity = new Vector2D(RND.between(-200, 200), RND.between(-200, 200))
+    this.rotationSpeed = rnd.floatBetween(0.1, 2)
+    this.velocity = new Vector2D(rnd.between(-200, 200), rnd.between(-200, 200))
     this.points = createPolygonPoints(0, 0, this.size, 12)
     // console.log(this.position, this.velocity)
   }

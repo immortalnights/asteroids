@@ -8,6 +8,7 @@ import StarBackground from './starbackground'
 import RND from './rnd'
 import Vector2D from './vector2d'
 import { GameObject, Box } from './gameobject'
+import { Explosion, Thruster } from './particleemitter'
 
 const MAX_ROCK_COUNT: number = 10
 
@@ -82,7 +83,7 @@ export default class Scene
   ship: Ship | null
   rocks: Array<Rock>
   bullets: Array<Bullet>
-  particals: Array<Particle>
+  explosions: Array<Explosion>
   colliders: Collider[]
 
   constructor(canvas: HTMLCanvasElement)
@@ -95,7 +96,7 @@ export default class Scene
     this.ship = null
     this.rocks = []
     this.bullets = []
-    this.particals = []
+    this.explosions = []
     this.colliders = []
   }
 
@@ -215,6 +216,16 @@ export default class Scene
       ship.turnTo(angle)
     }
 
+    const expired: number[] = []
+    this.explosions.forEach((e, index) => {
+      e.update(delta, this.canvas)
+      if (false === e.active)
+      {
+        expired.push(index)
+      }
+    })
+    expired.forEach(i => this.explosions.splice(i, 1))
+
     this.colliders.forEach(collider => {
       collider.check()
     })
@@ -224,6 +235,8 @@ export default class Scene
   {
     const context = this.context as CanvasRenderingContext2D
     context.clearRect(0, 0, this.canvas.width, this.canvas.height)
+
+    this.explosions.forEach(e => e.render(context))
 
     this.displayList.forEach(item => {
       item.update(delta)
@@ -283,6 +296,9 @@ export default class Scene
         this.rocks.push(rock)
       });
     }
+
+    const explosion = new Explosion(rock.position.x, rock.position.y, aRock.size / 2)
+    this.explosions.push(explosion)
 
     return true
   }
