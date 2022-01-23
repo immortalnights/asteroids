@@ -206,6 +206,7 @@ export default class Scene
           this.bullets.push(bullet)
           this.addGameObject(bullet, ship)
         }
+        this.input.shoot = false
       }
       this.input.changed = false
     }
@@ -246,9 +247,19 @@ export default class Scene
     const ship = this.ship as Ship
 
     context.fillStyle = '#ffffff'
-    context.fillText(`${this.input.pointer.x.toFixed(2)}, ${this.input.pointer.y.toFixed(2)}; ${ship.radians.toFixed(2)}, ${M.Angle.toRadians(ship.rotateTo || 0).toFixed(2)} ${ship.rotationSpeed.toFixed(2)}; ${ship.speed.toFixed(2)} ${ship.velocity.x.toFixed(2)}, ${ship.velocity.y.toFixed(2)}; ${ship.weaponCooldown.toFixed(2)}`, 10, 10)
-    context.fillText(`Controls ${this.input.accelerate}, ${this.input.turn}, ${this.input.shoot}`, 10, 20)
-    context.fillText(`Renderer ${this.displayList.length}`, 10, 30)
+    context.font = 'normal 12px monospace'
+    const lines: string[] = [
+      `Mouse    ${this.input.pointer.x.toFixed(2)}, ${this.input.pointer.y.toFixed(2)}`,
+      `Speed    ${ship.speed.toFixed(2)}, ${ship.velocity.x.toFixed(2)}, ${ship.velocity.y.toFixed(2)}`,
+      `Rotation ${ship.radians.toFixed(2)}, ${M.Angle.toRadians(ship.rotateTo || 0).toFixed(2)}, ${ship.rotationSpeed.toFixed(2)}`,
+      `Weapon   ${ship.weaponCooldown.toFixed(2)}`,
+      `Controls ${this.input.accelerate}, ${this.input.turn}, ${this.input.shoot}`,
+      `Renderer ${this.displayList.length}`,
+    ]
+
+    lines.forEach((s, index) => {
+      context.fillText(s, 12, 14 + index * 12)
+    })
 
 
     // debug

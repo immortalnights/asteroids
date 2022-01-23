@@ -14,7 +14,7 @@ export default class Ship implements GameObject
   velocity: Vector2D
   /** Angle in degrees */
   _angle: number
-  _speed: number
+  speed: number
   size: number
   thruster: Thruster
 
@@ -31,7 +31,7 @@ export default class Ship implements GameObject
     this.velocity = new Vector2D(0, 0)
     this.size = size
     this._angle = 0
-    this._speed = 0
+    this.speed = 25
     this.thruster = new Thruster(this.position.x, this.position.y, 3, 180, 0.05, [200, 200, 200, 1])
     this.thruster.burn = false
 
@@ -39,6 +39,16 @@ export default class Ship implements GameObject
     this.rotationSpeed = 0
 
     this.weaponCooldown = 0
+  }
+
+  get angle(): number
+  {
+    return this._angle
+  }
+
+  get radians(): number
+  {
+    return M.Angle.toRadians(this.angle)
   }
 
   // control interface
@@ -52,7 +62,7 @@ export default class Ship implements GameObject
     {
       case -1:
       {
-        this.rotationSpeed = -1
+        this.rotationSpeed = -5
         break
       }
       case 0:
@@ -62,7 +72,7 @@ export default class Ship implements GameObject
       }
       case 1:
       {
-        this.rotationSpeed = 1
+        this.rotationSpeed = 5
         break
       }
     }
@@ -79,15 +89,38 @@ export default class Ship implements GameObject
 
   accelerate()
   {
-    this.speed += 5
+    const xAcc = Math.cos(this.radians) * this.speed
+    if ((xAcc > 0 && this.velocity.x < 300) || (xAcc < 0 && this.velocity.x > -300))
+    {
+      this.velocity.x += xAcc
+    }
 
-    this.velocity.add(this.speed, this.speed)
-    this.velocity.setToPolar(this.radians, this.speed)
+    const yAcc = Math.sin(this.radians) * this.speed
+    if ((yAcc > 0 && this.velocity.y < 300) || (yAcc < 0 && this.velocity.y > -300))
+    {
+      this.velocity.y += yAcc
+    }
   }
 
   brake()
   {
-    this.speed -= 5
+    if (this.velocity.x > 0.1)
+    {
+      this.velocity.x -= Math.cos(this.radians) * this.speed;
+    }
+    else if (this.velocity.x < -0.1)
+    {
+      this.velocity.x += Math.cos(this.radians) * this.speed;
+    }
+
+    if (this.velocity.y > 0.1)
+    {
+      this.velocity.y -= Math.sin(this.radians) * this.speed;
+    }
+    else if (this.velocity.y < -0.1)
+    {
+      this.velocity.y += Math.sin(this.radians) * this.speed;
+    }
   }
 
   fire()
@@ -98,26 +131,6 @@ export default class Ship implements GameObject
       this.weaponCooldown = .125
     }
     return ok
-  }
-
-  get speed(): number
-  {
-    return this._speed
-  }
-
-  get angle(): number
-  {
-    return this._angle
-  }
-
-  get radians(): number
-  {
-    return M.Angle.toRadians(this.angle)
-  }
-
-  set speed(speed: number)
-  {
-    this._speed = M.clamp(speed, 0, SHIP_MAXIMUM_SPEED)
   }
 
   set angle(angle: number)
@@ -160,7 +173,7 @@ export default class Ship implements GameObject
     this.position.x = M.wrap(this.position.x, -(this.size * 2), this.scene.canvas.width + (this.size * 2))
     this.position.y = M.wrap(this.position.y, -(this.size * 2), this.scene.canvas.height + (this.size * 2))
 
-    this.thruster.burn = (velocity.x > 0 || velocity.y > 0)
+    this.thruster.burn = (velocity.x !== 0 && velocity.y !== 0)
     this.thruster.angle = 180 + this.angle
     this.thruster.position.x = this.position.x
     this.thruster.position.y = this.position.y
