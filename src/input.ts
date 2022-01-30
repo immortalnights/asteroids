@@ -35,13 +35,31 @@ export default class Input
     this.onMouseMove = this.onMouseMove.bind(this)
     this.onKeyDown = this.onKeyDown.bind(this)
     this.onKeyUp = this.onKeyUp.bind(this)
+  }
 
+  bind()
+  {
     window.addEventListener('mousedown', this.onMouseDown)
     this.canvas.addEventListener('mouseenter', this.onMouseEnter)
     this.canvas.addEventListener('mouseleave', this.onMouseLeave)
     this.canvas.addEventListener('mousemove', this.onMouseMove)
     window.addEventListener('keydown', this.onKeyDown)
     window.addEventListener('keyup', this.onKeyUp)
+  }
+
+  unbind()
+  {
+    window.removeEventListener('mousedown', this.onMouseDown)
+    this.canvas.removeEventListener('mouseenter', this.onMouseEnter)
+    this.canvas.removeEventListener('mouseleave', this.onMouseLeave)
+    this.canvas.removeEventListener('mousemove', this.onMouseMove)
+    window.removeEventListener('keydown', this.onKeyDown)
+    window.removeEventListener('keyup', this.onKeyUp)
+  }
+
+  destroy()
+  {
+    this.unbind()
   }
 
   onMouseDown(event: MouseEvent): void
@@ -128,15 +146,5 @@ export default class Input
     }
 
     this.changed = true
-  }
-
-  destroy()
-  {
-    window.removeEventListener('mousedown', this.onMouseDown)
-    this.canvas.removeEventListener('mouseenter', this.onMouseEnter)
-    this.canvas.removeEventListener('mouseleave', this.onMouseLeave)
-    this.canvas.removeEventListener('mousemove', this.onMouseMove)
-    window.removeEventListener('keydown', this.onKeyDown)
-    window.removeEventListener('keyup', this.onKeyUp)
   }
 }

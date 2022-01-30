@@ -6,7 +6,7 @@ module.exports = {
   entry: './src/index.ts',
   context: __dirname,
   output: {
-    filename: 'main.js',
+    filename: 'asteroids.js',
     path: path.resolve(__dirname, 'dist')
   },
   devServer: {
@@ -26,6 +26,6 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: './index.html',
-    }), 
+    }),
   ],
 }

@@ -26,11 +26,30 @@ export default class Asteroids
     this.scene.canvas.height = size.height
   }
 
+  // activate the player
   play()
+  {
+    this.scene.activate()
+  }
+
+  // deactivate the player
+  end()
+  {
+    this.scene.deactivate()
+  }
+
+  // create the scene and start the frame loop
+  start()
   {
     // this.active = true
     this.scene.create()
     this.onFrame(0)
+  }
+
+  // stop the frame loop
+  stop()
+  {
+    window.cancelAnimationFrame(this.animationFrameId)
   }
 
   onFrame(time: number)
@@ -42,10 +61,5 @@ export default class Asteroids
     this.scene.render(delta)
 
     this.animationFrameId = window.requestAnimationFrame(this.onFrame)
-  }
-
-  stop()
-  {
-    window.cancelAnimationFrame(this.animationFrameId)
   }
 }

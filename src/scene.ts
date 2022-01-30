@@ -100,6 +100,18 @@ export default class Scene
     this.colliders = []
   }
 
+  // add all input listeners
+  activate()
+  {
+    this.input.bind()
+  }
+
+  // remove all input listeners
+  deactivate()
+  {
+    this.input.unbind()
+  }
+
   get width(): number
   {
     return this.canvas.width

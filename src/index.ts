@@ -1,12 +1,28 @@
 import Asteroids from './asteroids'
 
+declare global {
+  interface Window { AsteroidsNS: any }
+}
+
+let game: Asteroids | undefined
+
 document.addEventListener('DOMContentLoaded', function() {
   const canvas = document.getElementsByTagName('canvas')[0] as HTMLCanvasElement
-  const asteroids = new Asteroids(canvas)
-  asteroids.resize()
-  asteroids.play()
+  game = new Asteroids(canvas)
+  game.resize()
+  game.start()
 
   window.addEventListener('resize', () => {
-    asteroids.resize()
+    (game as Asteroids).resize()
   })
 })
+
+window.AsteroidsNS = window.AsteroidsNS || {
+  play: function() {
+    game?.play()
+  },
+
+  end: function() {
+    game?.end()
+  },
+}
